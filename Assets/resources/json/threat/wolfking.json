@@ -1,0 +1,61 @@
+{
+    "filed": "forest",
+    "regen": [{
+        "monsterList": [1],
+        "cycle": 5, 
+        "produce": 2
+    }],
+    "threat": [
+        {
+            "title": "어미와새끼",
+            "desc": "엄마? 아빠어디갔어?",
+            "trigger": [{
+                "type": "hunt",
+                "monsterList": [1],
+                "count": 20
+            }],
+            "result": [
+                {
+                    "type": "produce",
+                    "monsterList": [2],
+                    "produce": 9
+                },
+                {
+                    "type": "produce",
+                    "monsterList": [3],
+                    "produce": 1
+                }
+            ]
+        },
+
+        {
+            "title": "늑대우두머리",
+            "desc": "누가 우리 아그들 건드냐?",
+            "trigger":[{
+                "type": "hunt",
+                "monsterList": [1],
+                "count": 15
+            }],
+            "result": [{
+                "type": "produce",
+                "monsterList": [4],
+                "produce": 1
+            }]
+        }
+    ],
+
+    "goal" : {
+        "title": "늑대왕",
+        "desc": "늑대 늑대 늑대",
+        "trigger":[{
+            "type": "hunt",
+            "monsterList": [2],
+            "count": 2
+        }],
+        "result": [{
+            "type": "produce",
+            "monsterList": [5],
+            "produce": 1
+        }]
+    }
+}
