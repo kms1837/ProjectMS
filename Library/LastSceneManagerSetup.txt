@@ -1,4 +1,0 @@
-sceneSetups:
-- path: Assets/Scenes/battle_ground.unity
-  isLoaded: 1
-  isActive: 1
