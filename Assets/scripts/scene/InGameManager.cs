@@ -8,6 +8,9 @@ public class InGameManager : MonoBehaviour {
     private GameObject enemyGroup;
     private int currentLayer; // 시작레이어(0-밖, 1-안)
 
+    public Transform cameraTarget; // 카메라가 따라다닐 대상
+    private GameObject background;
+
     private void childsLayerActive(GameObject group) {
         foreach (Transform child in group.transform) {
             if (child.GetComponent<Character>().layer == currentLayer) {
@@ -30,6 +33,11 @@ public class InGameManager : MonoBehaviour {
         indoor.SetActive(outdoor.activeSelf ? true : false);
         outdoor.SetActive(outdoor.activeSelf ? false : true);
 
+        Color backgroundColor;
+        backgroundColor = outdoor.activeSelf ? new Color(0.33f, 0.58f, 0.98f) : new Color(0,0,0);
+        Camera.main.backgroundColor = backgroundColor;
+        background.SetActive(outdoor.activeSelf);
+
         currentLayer = currentLayer == 1 ? 0 : 1;
         childsLayerActive();
     }
@@ -38,10 +46,12 @@ public class InGameManager : MonoBehaviour {
         Map = GameObject.Find("Map");
         npcGroup = GameObject.Find("NpcGroup");
         enemyGroup = GameObject.Find("EnemyGroup");
+
+        background = Camera.main.transform.Find("Background").gameObject;
         childsLayerActive();
     }
 
 	void Update () {
-		
-	}
+        Camera.main.transform.position = cameraTarget.position - Vector3.forward;
+    }
 }
