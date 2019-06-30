@@ -98,13 +98,9 @@ public class Character : MonoBehaviour
         infomation.manaPoint = 50;
         currentHealthPoint = infomation.healthPoint;
         currentManaPoint = infomation.manaPoint;
-        jumpCount = 0;
 
         infomation.aggroRange = objRect.width;
         infomation.range = objRect.width * 2;
-
-        Debug.Log(objRect.width);
-
 
         beforeDelayActionStr = string.Empty;
 
@@ -117,6 +113,8 @@ public class Character : MonoBehaviour
         for (int i = 0; i < 5; i++) {
             equipments[i] = new Ability();
         }
+
+        jumpClear();
     }
 
     private void updateUI() {
@@ -343,9 +341,7 @@ public class Character : MonoBehaviour
         }
 
         prevAction = this.action;
-
-        clearAction();
-
+        
         Vector2 currentPosition = this.transform.position;
         float spriteDirection = this.direction > 0 ? 1 : -1;
         this.transform.localScale = new Vector3(spriteDirection, 1, 1);
@@ -355,7 +351,8 @@ public class Character : MonoBehaviour
            totalSpeed += infomation.runSpeed;
         }
 
-        animator.SetBool("Walk", true);
+        animator.SetBool("Walk", !isJump);
+
         rigidbody.velocity = new Vector2(this.direction * totalSpeed, rigidbody.velocity.y);
 
         backAction();
@@ -372,13 +369,24 @@ public class Character : MonoBehaviour
         };
     } // 벽에 매달릴수 있는지 체크하고 벽에 매달림
 
-    public void checkGround() {
+    public void falling() {
+        if (!groundCheck()) {
+            animator.SetBool("Jump", true);
+            animator.SetBool("Walk", false);
+        }
+        /* 
+         isGround 상태 체크를 충돌시에 한 이유는 최적화와 얇게 점프시 ray길이 문제로 바닥에 닿은 것으로 판단해 다중 점프가 가능해지는 문제가 발견됨
+         (ray길이는 어느정도 길게 해줘야 정확도가 높아짐)
+
+         */
+    } // 추락상태인지 확인하고 애니메이션 재생
+
+    private bool groundCheck() {
         float bottom = transform.position.y - characterCollider.bounds.extents.y;
         RaycastHit2D rayObject = Physics2D.Raycast(new Vector2(transform.position.x, bottom), Vector2.down, 1.0f, LayerMask.GetMask("Platform"));
         Debug.DrawLine(new Vector2(transform.position.x, bottom), new Vector2(transform.position.x, bottom - 1.0f));
 
-        isGround = rayObject.transform != null ? true : false;
-        animator.SetBool("Jump", !isGround);
+        return rayObject.transform != null ? true : false;
     }
 
     public void jumpEnd() {
@@ -389,6 +397,7 @@ public class Character : MonoBehaviour
     private void jumpHolding() {
         currentJumpPoint += 1.0f;
         rigidbody.AddForce(Vector2.up * 1.0f, ForceMode2D.Impulse);
+        
 
         if (currentJumpPoint >= infomation.jumpPower) {
             jumpEnd();
@@ -398,31 +407,29 @@ public class Character : MonoBehaviour
     private void jumpClear() {
         isJump = false;
         jumpCount = 0;
+        animator.SetBool("Jump", false);
     }
 
     public void jump() {
         if (actionCheck() || isSlide) {
             return;
         }
-
-        clearAction();
-
-        if (isGround && isJump) {
-            jumpClear();
-        }
-
+        
         if (!isJump) {
             if (isHangOn) {
                 rigidbody.gravityScale = 1;
                 isHangOn = false;
                 Debug.Log("매달리기 해제");
             }
+        }
 
+        if (!isJump || jumpCount < infomation.maxJump) {
             jumpCount++;
-            if (jumpCount >= infomation.maxJump) {
-                isJump = true;
-            }
-            animator.SetBool("Jump", true);
+
+            isJump = true;
+            CancelInvoke("jumpHolding");
+
+            clearAction();
             InvokeRepeating("jumpHolding", 0.0f, 0.01f);
         }
     }
@@ -444,6 +451,12 @@ public class Character : MonoBehaviour
         isSlide = true;
     }
 
+    public void idle() {
+        if (!isJump && !isSlide && !isHangOn) {
+            clearAction();
+        }
+    } // 대기 상태인지 체크하고 애니메이션을 초기화함
+
     private void clearAction() {
         float bottom = transform.position.y - characterCollider.bounds.extents.y;
         RaycastHit2D rayObject = Physics2D.Raycast(new Vector2(transform.position.x, bottom), Vector2.up, 1.0f, LayerMask.GetMask("Platform"));
@@ -452,11 +465,9 @@ public class Character : MonoBehaviour
 
         bool clearFlag = true;
 
-        //Debug.Log(rayObject.transform);
-
         if (rayObject.transform != null) {
             clearFlag = false;
-        }
+        }// 슬라이드중 벽에 끼어있으므로 슬라이드 유지
 
         if (clearFlag) {
             animator.SetBool("Slide", false);
@@ -558,9 +569,16 @@ public class Character : MonoBehaviour
             float damage = collisionObj.infomation.power;
             this.hit(damage, this.transform.localScale.x * -1);
         } // 같은그룹 공격 불가 판정
+
+        if (collision.transform.tag == "Platform") {
+            isGround = groundCheck();
+            if (isGround) {
+                jumpClear();
+            }
+        }
     }// 서로 충돌시
 
-    private void OnTriggerEnter2D(Collider2D collision) {
+    private void OnTriggerEnter2D (Collider2D collision) {
         Character collisionObj = collision.transform.parent.GetComponent<Character>();
 
         if (collision.tag == "Hitbox" && groupNumber != collisionObj.groupNumber) {

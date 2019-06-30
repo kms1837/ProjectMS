@@ -47,6 +47,9 @@ public class PlayerController : MonoBehaviour {
             }
             player.move();
         }
+        else {
+            player.idle();
+        }
     }
 
     void jump() {
@@ -77,21 +80,21 @@ public class PlayerController : MonoBehaviour {
 
     private void keyAction() {
         if (player.action == (int)Character.CharacterAction.Event) {
+            player.idle();
             return;
         }
 
-        movement();
         jump();
+        movement();
         attack();
         slide();
     }
 
     private void FixedUpdate() {
         keyAction();
-        player.checkGround();
+        player.falling();
     }
 
     void Update () {
-        //keyAction();
     }
 }
