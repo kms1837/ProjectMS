@@ -6,9 +6,8 @@
 ``` sh
 1. Unity3D 실행
 ```
-
-##개발환경
+## 개발환경
 * OS: Windows10
 * Engine: Unity 2018.2.8.f1
 
-##License
+## License
