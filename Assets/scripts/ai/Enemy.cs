@@ -18,10 +18,15 @@ public class Enemy : MonoBehaviour {
     }
 
     private void movement() {
-        if (character.aggroTarget) {
+        if (character.aggroTarget && character.action == (int)Character.CharacterAction.Battle) {
             float directionCheck = this.transform.position.x - character.aggroTarget.position.x;
             character.direction = directionCheck >= 0 ? -1 : 1;
             character.move();
+
+            float distance = Vector2.Distance(this.transform.position, character.aggroTarget.position);
+            if (character.infomation.range >= distance) {
+                character.attack();
+            }
         }
     }
 

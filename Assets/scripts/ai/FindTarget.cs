@@ -18,7 +18,9 @@ public class FindTarget : MonoBehaviour {
         }
 
         if (target.transform.IsChildOf(targetGroup.transform) && (target.tag == "Character" || target.tag == "Player")) {
-            this.transform.parent.GetComponent<Character>().setAggroTarget(target.transform);
+            Character character = this.transform.parent.GetComponent<Character>();
+            character.setAggroTarget(target.transform);
+            character.action = (int)Character.CharacterAction.Battle;
         };
     }
 

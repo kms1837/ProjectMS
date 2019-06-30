@@ -178,14 +178,14 @@ public class Skill :MonoBehaviour
         if (currentSkill.target == (int)SkillTargetType.Broadcast) { // 거리 상관없이 발동됨
             foreach (Transform target in allianceGroup.transform) {
                 targetInfo = target.GetComponent<Character>();
-                targetInfo.hit(this.infomation.power);
+                targetInfo.hit(this.infomation.power, targetInfo.direction);
                 Debug.Log(string.Format("{0}에게 {1} 만큼 물리 대미지를 입힘", targetInfo.infomation.nameStr, this.infomation.power));
             }
         }
         else {
             if (user.aggroTarget != null) {
                 targetInfo = user.aggroTarget.GetComponent<Character>();
-                targetInfo.hit(this.infomation.power);
+                targetInfo.hit(this.infomation.power,targetInfo.direction);
                 Debug.Log(string.Format("{0}에게 {1} 만큼 물리 대미지를 입힘", targetInfo.infomation.nameStr, this.infomation.power));
             }
         }
@@ -196,14 +196,14 @@ public class Skill :MonoBehaviour
         if (currentSkill.target == (int)SkillTargetType.Broadcast) { // 거리 상관없이 발동됨
             foreach (Transform target in allianceGroup.transform) {
                 targetInfo = target.GetComponent<Character>();
-                targetInfo.hit(this.infomation.power);
+                targetInfo.hit(this.infomation.power,targetInfo.direction);
                 Debug.Log(string.Format("{0}에게 {1} 만큼 마법 대미지를 입힘", targetInfo.infomation.nameStr, this.infomation.power));
             }
         }
         else {
             if (user.aggroTarget != null) {
                 targetInfo = user.aggroTarget.GetComponent<Character>();
-                targetInfo.hit(this.infomation.power);
+                targetInfo.hit(this.infomation.power,targetInfo.direction);
                 Debug.Log(string.Format("{0}에게 {1} 만큼 마법 대미지를 입힘", targetInfo.infomation.nameStr, this.infomation.power));
             }
         }

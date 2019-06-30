@@ -100,8 +100,10 @@ public class Character : MonoBehaviour
         currentManaPoint = infomation.manaPoint;
         jumpCount = 0;
 
-        infomation.aggroRange = objRect.width + 200;
-        infomation.range = objRect.width + 10;
+        infomation.aggroRange = objRect.width;
+        infomation.range = objRect.width * 2;
+
+        Debug.Log(objRect.width);
 
 
         beforeDelayActionStr = string.Empty;
@@ -171,17 +173,19 @@ public class Character : MonoBehaviour
         direction = inDirection;
         originDirection = inDirection;
     }
-
+    
     public void attack() {
         if (actionCheck() || isSlide) {
             return;
         }
 
+        prevAction = this.action;
+
         clearAction();
 
         this.action = (int)Character.CharacterAction.Attack;
         animator.SetBool("Attack", true);
-        Invoke("clearAction", 0.4f);
+        Invoke("clearToBackAction", 0.4f);
 
         /*
         if (targetCheck()) {
@@ -289,7 +293,7 @@ public class Character : MonoBehaviour
         this.currentHealthPoint = this.currentHealthPoint >= this.infomation.healthPoint ? this.infomation.healthPoint : this.currentHealthPoint + healPower;
     } // 회복받음
 
-    public void hit(float damage) {
+    public void hit(float damage, float attackDirection) {
         this.transform.Find("Sprite").GetComponent<SpriteRenderer>().color = new Color(255, 0, 0);
         Invoke("colorClear", 0.1f);
 
@@ -306,7 +310,7 @@ public class Character : MonoBehaviour
         }
         
         rigidbody.velocity = new Vector2(0, 0);
-        rigidbody.AddForce(new Vector2(this.transform.localScale.x * -1, 1) * this.infomation.movementSpeed, ForceMode2D.Impulse);
+        rigidbody.AddForce(new Vector2(attackDirection, 1) * this.infomation.movementSpeed, ForceMode2D.Impulse);
     } // 공격받음
 
     private void dead() {
@@ -338,6 +342,8 @@ public class Character : MonoBehaviour
             return;
         }
 
+        prevAction = this.action;
+
         clearAction();
 
         Vector2 currentPosition = this.transform.position;
@@ -351,6 +357,8 @@ public class Character : MonoBehaviour
 
         animator.SetBool("Walk", true);
         rigidbody.velocity = new Vector2(this.direction * totalSpeed, rigidbody.velocity.y);
+
+        backAction();
         // * Time.deltaTime - 프레임차이 문제인데 너무 속도에 영향을줌
     } // 이동
 
@@ -440,6 +448,8 @@ public class Character : MonoBehaviour
         float bottom = transform.position.y - characterCollider.bounds.extents.y;
         RaycastHit2D rayObject = Physics2D.Raycast(new Vector2(transform.position.x, bottom), Vector2.up, 1.0f, LayerMask.GetMask("Platform"));
         Debug.DrawLine(new Vector2(transform.position.x, bottom), new Vector2(transform.position.x, bottom + 1.0f));
+        // 슬라이드중 벽 사이에 끼어있는지 체크
+
         bool clearFlag = true;
 
         //Debug.Log(rayObject.transform);
@@ -458,7 +468,12 @@ public class Character : MonoBehaviour
         animator.SetBool("Walk", false);
 
         this.action = (int)Character.CharacterAction.Normal;
-    }
+    } // 케릭터 행동상태를 기본으로 초기화시킴
+
+    private void clearToBackAction() {
+        clearAction();
+        backAction();
+    } // 케릭터 행동상태를 초기화 시키고 이전 행동으로 돌아감
 
     public void battle() {
         if (targetCheck()) {
@@ -541,16 +556,16 @@ public class Character : MonoBehaviour
 
         if (collision.transform.tag == "Character" && groupNumber != collisionObj.groupNumber) {
             float damage = collisionObj.infomation.power;
-            this.hit(damage);
+            this.hit(damage, this.transform.localScale.x * -1);
         } // 같은그룹 공격 불가 판정
-    }
+    }// 서로 충돌시
 
     private void OnTriggerEnter2D(Collider2D collision) {
         Character collisionObj = collision.transform.parent.GetComponent<Character>();
 
         if (collision.tag == "Hitbox" && groupNumber != collisionObj.groupNumber) {
             float damage = collision.transform.parent.GetComponent<Character>().infomation.power;
-            this.hit(damage);
+            this.hit(damage, collision.transform.parent.localScale.x);
         } // 같은그룹 공격 불가 판정
-    }
+    }// 히트박스에 충돌
 }
