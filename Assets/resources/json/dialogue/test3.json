@@ -1,0 +1,17 @@
+{
+    "dialogue" : [
+        {
+            "type": 0,
+            "name": "지나가는 행인",
+            "message": "대체 무슨 볼일 이신가요?",
+            "answer": []
+        },
+        {
+            "type": 2,
+            "name": "지나가는 행인",
+            "message": "이제 그만 해주세요",
+            "answer": [],
+            "load": "test4"
+        }
+    ]
+}

@@ -1,0 +1,51 @@
+{
+    "dialogue" : [
+        {
+            "type": 1,
+            "name": "질문빌런",
+            "message": "질문을 받아라 이야아아아아아압~~~~",
+            "answer": [
+                {
+                    "type": 0,
+                    "text": "질문1",
+                    "next": 1
+                },
+                {
+                    "type": 0,
+                    "text": "질문2",
+                    "next": 1
+                },
+                {
+                    "type": 0,
+                    "text": "질문3",
+                    "next": 1
+                },
+                {
+                    "type": 0,
+                    "text": "질문4",
+                    "next": 1
+                },
+                {
+                    "type": 0,
+                    "text": "질문5",
+                    "next": 1
+                },
+                {
+                    "type": 0,
+                    "text": "질문6",
+                    "next": 1
+                },
+                {
+                    "type": 0,
+                    "text": "질문7",
+                    "next": 1
+                }
+            ]
+        },
+        {
+            "type": 2,
+            "name": "질문빌런",
+            "message": "고마워~~~~"
+        }
+    ]
+}

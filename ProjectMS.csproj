@@ -312,10 +312,11 @@
     <Compile Include="Assets\JSON\JSONObject.cs" />
     <Compile Include="Assets\JSON\JSONTemplates.cs" />
     <Compile Include="Assets\JSON\VectorTemplates.cs" />
+    <Compile Include="Assets\scripts\ai\Enemy.cs" />
     <Compile Include="Assets\scripts\ai\FindTarget.cs" />
+    <Compile Include="Assets\scripts\ai\Npc.cs" />
     <Compile Include="Assets\scripts\BattleSystem.cs" />
     <Compile Include="Assets\scripts\DataBase.cs" />
-    <Compile Include="Assets\scripts\Enemy.cs" />
     <Compile Include="Assets\scripts\Fader.cs" />
     <Compile Include="Assets\scripts\map\Portal.cs" />
     <Compile Include="Assets\scripts\object\Ability.cs" />
@@ -326,14 +327,20 @@
     <Compile Include="Assets\scripts\object\Score.cs" />
     <Compile Include="Assets\scripts\object\Skill.cs" />
     <Compile Include="Assets\scripts\PlayerController.cs" />
+    <Compile Include="Assets\scripts\scene\InGameManager.cs" />
     <Compile Include="Assets\scripts\scene\Intro.cs" />
     <Compile Include="Assets\scripts\scene\MainMenu.cs" />
     <Compile Include="Assets\scripts\scene\Town.cs" />
     <Compile Include="Assets\scripts\ui\Common.cs" />
+    <Compile Include="Assets\scripts\ui\Dialogue.cs" />
+    <Compile Include="Assets\scripts\ui\InventoryPanel.cs" />
     <Compile Include="Assets\scripts\ui\Popup.cs" />
     <Compile Include="Assets\scripts\ui\QuestBoard.cs" />
+    <Compile Include="Assets\scripts\ui\QuickStatus.cs" />
     <Compile Include="Assets\scripts\ui\RoomState.cs" />
     <Compile Include="Assets\scripts\ui\StatusBar.cs" />
+    <Compile Include="Assets\scripts\ui\StatusPanel.cs" />
+    <Compile Include="Assets\scripts\UIController.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\JSON\readme.txt" />

@@ -4,9 +4,25 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
     private Character player;
-    
+    private bool wallCollision;
+    private Collision2D collisionWall;
+
     void Start () {
         player = this.GetComponent<Character>();
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision) {
+        if (collision.transform.tag == "Platform") {
+            wallCollision = true;
+            collisionWall = collision;
+        }
+    }
+
+    private void OnCollisionExit2D(Collision2D collision) {
+        if (collision.transform.tag == "Platform") {
+            wallCollision = false;
+            collisionWall = null;
+        }
     }
 
     void movement() {
@@ -14,6 +30,14 @@ public class PlayerController : MonoBehaviour {
         player.direction = direction;
 
         if (direction != 0) {
+            if (!player.isGround && wallCollision) {
+                if (player.isJump) {
+                    player.hangOnWall(collisionWall);
+                }
+                return;
+                // 공중상태에서 이동시 벽에 붙는 버그 방지
+            }
+
             if (Input.GetButtonDown("Run")) {
                 player.isRun = true;
             }
@@ -28,6 +52,10 @@ public class PlayerController : MonoBehaviour {
     void jump() {
         if (Input.GetButtonDown("Jump")) {
             player.jump();
+        }
+
+        if (Input.GetButtonUp("Jump")) {
+            player.jumpEnd();
         }
     }
 
@@ -48,6 +76,10 @@ public class PlayerController : MonoBehaviour {
     }
 
     private void keyAction() {
+        if (player.action == (int)Character.CharacterAction.Event) {
+            return;
+        }
+
         movement();
         jump();
         attack();

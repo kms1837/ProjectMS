@@ -24,6 +24,7 @@ public class Ability
     public float runSpeed; // 달리기 속도
     public float range; // 공격거리
     public float jumpPower; // 점프력
+    public int maxJump; // 가능한 점프횟수
 
     public float power;
 

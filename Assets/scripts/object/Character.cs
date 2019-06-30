@@ -15,20 +15,26 @@ public class Character : MonoBehaviour
     public int status; // 케릭터 상태(화상, 빙결 등)
     public int type; // 케릭터 타입
     public int attackType;
+    public int layer; // 케릭터가 있는 위치(0 - outdoor, 1 - indoor)
+    public int groupNumber; // 케릭터 식별그룹(같은 아군끼리 공격방지)
 
     public bool isRun; // 달리는 중인지 체크
     public bool isJump; // 점프 중인지 체크
+    public bool isGround; // 공중에 떠있는 상태인지 체크
+    public bool isHangOn; // 매달려 있는 상태인지 체크
     private bool isSlide; // 슬라이딩 중인지 체크
 
     public float currentHealthPoint; // HP
     public float currentManaPoint; // MP
+    private float currentJumpPoint;
+    private int jumpCount; // 현재 몇번 점프중인지 체크
 
     public Transform aggroTarget; // 공격대상
     public float direction; // 방향
     private int originDirection; // 평소 이동 방향
 
-    public enum CharacterAction { Normal, Battle, Attack, Control, Wait, BeforeDelay, AfterDelay, Constraint, Ultimate, Skill1, Skill2 }
-    // 평상시, 전투모드, 공격중, 조작중, 대기중, 선딜레이중, 후딜레이중, 행동제약, 궁극기사용중, 스킬1 사용중, 스킬2 사용중
+    public enum CharacterAction { Normal, Battle, Attack,  Event, Control, Wait, BeforeDelay, AfterDelay, Constraint, Ultimate, Skill }
+    // 평상시, 전투모드, 공격중, 이벤트중, 조작중, 대기중, 선딜레이중, 후딜레이중, 행동제약, 궁극기사용중, 스킬 사용중
 
     public enum CharacterType { Hero, NPC, Monster, Boss }
     public enum CharacterAttackType { Attack, Heal }
@@ -82,13 +88,17 @@ public class Character : MonoBehaviour
         infomation.movementSpeed = 5f;
         infomation.runSpeed = 5f;
         infomation.jumpPower = 15.5f;
+        infomation.maxJump = 2;
         direction = 1;
         infomation.power = 10;
         infomation.beforeDelay = 2.0f;
         infomation.afterDelay = 2.0f;
         infomation.energyPower = 5;
         infomation.healthPoint = 100;
-        currentHealthPoint = 100;
+        infomation.manaPoint = 50;
+        currentHealthPoint = infomation.healthPoint;
+        currentManaPoint = infomation.manaPoint;
+        jumpCount = 0;
 
         infomation.aggroRange = objRect.width + 200;
         infomation.range = objRect.width + 10;
@@ -344,16 +354,42 @@ public class Character : MonoBehaviour
         // * Time.deltaTime - 프레임차이 문제인데 너무 속도에 영향을줌
     } // 이동
 
+    public void hangOnWall(Collision2D collisionWall) {
+        if (transform.position.y > collisionWall.contacts[0].point.y) {
+            isHangOn = true;
+            rigidbody.gravityScale = 0;
+            transform.position = new Vector2(transform.position.x, collisionWall.contacts[0].point.y);
+
+            jumpClear();
+        };
+    } // 벽에 매달릴수 있는지 체크하고 벽에 매달림
+
     public void checkGround() {
         float bottom = transform.position.y - characterCollider.bounds.extents.y;
         RaycastHit2D rayObject = Physics2D.Raycast(new Vector2(transform.position.x, bottom), Vector2.down, 1.0f, LayerMask.GetMask("Platform"));
         Debug.DrawLine(new Vector2(transform.position.x, bottom), new Vector2(transform.position.x, bottom - 1.0f));
 
-        if (rayObject.transform != null) {
-            animator.SetBool("Jump", false);
-        } else {
-            animator.SetBool("Jump", true);
+        isGround = rayObject.transform != null ? true : false;
+        animator.SetBool("Jump", !isGround);
+    }
+
+    public void jumpEnd() {
+        currentJumpPoint = 0;
+        CancelInvoke("jumpHolding");
+    }
+
+    private void jumpHolding() {
+        currentJumpPoint += 1.0f;
+        rigidbody.AddForce(Vector2.up * 1.0f, ForceMode2D.Impulse);
+
+        if (currentJumpPoint >= infomation.jumpPower) {
+            jumpEnd();
         }
+    }
+
+    private void jumpClear() {
+        isJump = false;
+        jumpCount = 0;
     }
 
     public void jump() {
@@ -363,18 +399,23 @@ public class Character : MonoBehaviour
 
         clearAction();
 
-        float bottom = transform.position.y - characterCollider.bounds.extents.y;
-        RaycastHit2D rayObject = Physics2D.Raycast(new Vector2(transform.position.x, bottom), Vector2.down, 1.0f, LayerMask.GetMask("Platform"));
-        Debug.DrawLine(new Vector2(transform.position.x, bottom), new Vector2(transform.position.x, bottom - 1.0f));
-
-        if (rayObject.transform != null && isJump) {
-            isJump = false;
+        if (isGround && isJump) {
+            jumpClear();
         }
 
         if (!isJump) {
-            isJump = true;
+            if (isHangOn) {
+                rigidbody.gravityScale = 1;
+                isHangOn = false;
+                Debug.Log("매달리기 해제");
+            }
+
+            jumpCount++;
+            if (jumpCount >= infomation.maxJump) {
+                isJump = true;
+            }
             animator.SetBool("Jump", true);
-            rigidbody.AddForce(Vector2.up * infomation.jumpPower, ForceMode2D.Impulse);
+            InvokeRepeating("jumpHolding", 0.0f, 0.01f);
         }
     }
 
@@ -401,7 +442,7 @@ public class Character : MonoBehaviour
         Debug.DrawLine(new Vector2(transform.position.x, bottom), new Vector2(transform.position.x, bottom + 1.0f));
         bool clearFlag = true;
 
-        Debug.Log(rayObject.transform);
+        //Debug.Log(rayObject.transform);
 
         if (rayObject.transform != null) {
             clearFlag = false;
@@ -496,16 +537,20 @@ public class Character : MonoBehaviour
     } // 강제로 바라보는 대상을 변경합니다.
 
     private void OnCollisionEnter2D (Collision2D collision) {
-        if (collision.transform.tag == "Character") {
-            float damage = collision.transform.GetComponent<Character>().infomation.power;
+        Character collisionObj = collision.transform.GetComponent<Character>();
+
+        if (collision.transform.tag == "Character" && groupNumber != collisionObj.groupNumber) {
+            float damage = collisionObj.infomation.power;
             this.hit(damage);
-        }
+        } // 같은그룹 공격 불가 판정
     }
 
     private void OnTriggerEnter2D(Collider2D collision) {
-        if (collision.tag == "Hitbox") {
+        Character collisionObj = collision.transform.parent.GetComponent<Character>();
+
+        if (collision.tag == "Hitbox" && groupNumber != collisionObj.groupNumber) {
             float damage = collision.transform.parent.GetComponent<Character>().infomation.power;
             this.hit(damage);
-        }
+        } // 같은그룹 공격 불가 판정
     }
 }

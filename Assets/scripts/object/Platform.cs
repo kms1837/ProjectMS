@@ -15,9 +15,5 @@ public class Platform : MonoBehaviour {
 	}
 
     private void OnCollisionEnter2D (Collision2D collision) {
-        /*Debug.Log("[a]");
-        Debug.Log(this.transform.position);
-        Debug.Log("[b]");
-        Debug.Log(collision.ToString());*/
     }
 }

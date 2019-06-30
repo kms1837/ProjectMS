@@ -621,7 +621,7 @@ public class BattleSystem :MonoBehaviour {
         BottomView.transform.Find("SubSkillButton1").Find("CoolTimeBar").Find("Bar").GetComponent<Image>().color = new Color(0f, 174.0f, 255.0f);
 
         Character UserObj = Player.GetComponent<Character>();
-        UserObj.setNextAction((int)Character.CharacterAction.Skill1);
+        UserObj.setNextAction((int)Character.CharacterAction.Skill);
     }
 
     public void activeUserSubSkill2() {
@@ -632,7 +632,7 @@ public class BattleSystem :MonoBehaviour {
         BottomView.transform.Find("SubSkillButton2").Find("CoolTimeBar").Find("Bar").GetComponent<Image>().color = new Color(0f, 174.0f, 255.0f);
 
         Character UserObj = Player.GetComponent<Character>();
-        UserObj.setNextAction((int)Character.CharacterAction.Skill2);
+        UserObj.setNextAction((int)Character.CharacterAction.Skill);
     }
 
     public void returnSceneBtn() {

@@ -7,9 +7,9 @@ public class Portal : MonoBehaviour
 {
     public enum PortalType { Direct, Key };
     // Direct - 닿는 즉시 작동, Key - 행동키를 눌러야 작동
-    public GameObject Map;
 
     private bool portalReady; // 연속 작동 방지
+    private InGameManager manager;
 
     [Header("0 - Direct, 1- Action key")]
     [Range(0, 1)]
@@ -21,11 +21,11 @@ public class Portal : MonoBehaviour
     // Use this for initialization
     void Start () {
         portalReady = true;
+        manager = GameObject.Find("GameSystem").GetComponent<InGameManager>();
     }
 	
 	// Update is called once per frame
 	void Update () {
-		
 	}
 
     private void portal() {
@@ -34,10 +34,7 @@ public class Portal : MonoBehaviour
                 SceneManager.LoadScene(moveScene);
             }
             else {
-                GameObject indoor = Map.transform.Find("Indoor").gameObject;
-                GameObject outdoor = Map.transform.Find("Outdoor").gameObject;
-                indoor.SetActive(outdoor.activeSelf ? true : false);
-                outdoor.SetActive(outdoor.activeSelf ? false : true);
+                manager.layerExchange();
             }
         }
     }
