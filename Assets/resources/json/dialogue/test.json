@@ -3,12 +3,14 @@
         {
             "type": 0,
             "name": "아무개씨",
+            "rightImg": "dummy/diachar1",
             "message": "앗 저에게 대화를 거셨군요! 환영합니다.",
             "answer": []
         },
         {
             "type": 1,
             "name": "아무개씨",
+            "rightImg": "dummy/diachar1",
             "message": "무엇을 도와드릴까요?",
             "answer": [
                 {
@@ -26,12 +28,14 @@
         {
             "type": 2,
             "name": "아무개씨",
+            "rightImg": "dummy/diachar1",
             "message": "하하 다음에 또 말 걸어주세요",
             "answer": []
         }, 
         {
             "type": 2,
             "name": "아무개씨",
+            "rightImg": "dummy/diachar1",
             "message": "앗 그러시군요 다음에 또 뵈요~",
             "answer": []
         }

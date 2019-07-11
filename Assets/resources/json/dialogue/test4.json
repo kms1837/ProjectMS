@@ -3,6 +3,7 @@
         {
             "type": 2,
             "name": "지나가는 행인",
+            "leftImg": "dummy/diachar2",
             "message": "제발 그만하라고",
             "answer": []
         }

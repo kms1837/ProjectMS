@@ -3,12 +3,14 @@
         {
             "type": 0,
             "name": "지나가는 행인",
+            "leftImg": "dummy/diachar2",
             "message": "누구세요?",
             "answer": []
         },
         {
             "type": 2,
             "name": "지나가는 행인",
+            "leftImg": "dummy/diachar2",
             "message": "그럼 저는 가볼게요~",
             "answer": [],
             "load": "test3"
