@@ -3,6 +3,7 @@ TEMP/
 metadata/
 Library/
 .vs/
+obj/
 
 *.log
 *.info
