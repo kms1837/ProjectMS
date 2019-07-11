@@ -32,7 +32,7 @@ public class PlayerController : MonoBehaviour {
         if (direction != 0) {
             if (!player.isGround && wallCollision) {
                 if (player.isJump) {
-                    player.hangOnWall(collisionWall);
+                    //player.hangOnWall(collisionWall);
                 }
                 return;
                 // 공중상태에서 이동시 벽에 붙는 버그 방지
@@ -80,7 +80,6 @@ public class PlayerController : MonoBehaviour {
 
     private void keyAction() {
         if (player.action == (int)Character.CharacterAction.Event) {
-            player.idle();
             return;
         }
 

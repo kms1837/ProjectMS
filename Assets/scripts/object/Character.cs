@@ -41,6 +41,7 @@ public class Character : MonoBehaviour
 
     private string beforeDelayActionStr; // 선딜레이 중인 함수 이름(invoke 중인 상태)
 
+    public ArrayList inventory;
     public Ability[] equipments; // 장비
 
     public ArrayList buffList; // 버프, 디버프 리스트
@@ -70,6 +71,8 @@ public class Character : MonoBehaviour
     private BoxCollider2D characterCollider;
     private Animator animator;
 
+    private CharacterSound sound;
+
     void Awake() {
         Vector2 objPosition = this.transform.position;
         Rect objRect = this.gameObject.GetComponent<RectTransform>().rect;
@@ -77,12 +80,11 @@ public class Character : MonoBehaviour
         rigidbody = this.GetComponent<Rigidbody2D>();
         characterCollider = this.GetComponent<BoxCollider2D>();
         animator = this.GetComponent<Animator>();
+        sound = this.GetComponent<CharacterSound>();
 
         infomation = new Ability();
 
         this.action = (int)CharacterAction.Normal;
-
-        aggroTarget = null;
 
         // base setting
         infomation.movementSpeed = 5f;
@@ -109,6 +111,11 @@ public class Character : MonoBehaviour
 
         buffList = new ArrayList();
         equipments = new Ability[5];
+
+        inventory = new ArrayList();
+        inventory.Add(new Item(inventory, 1));
+        inventory.Add(new Item(inventory, 1));
+        inventory.Add(new Item(inventory, 1));
 
         for (int i = 0; i < 5; i++) {
             equipments[i] = new Ability();
@@ -184,40 +191,6 @@ public class Character : MonoBehaviour
         this.action = (int)Character.CharacterAction.Attack;
         animator.SetBool("Attack", true);
         Invoke("clearToBackAction", 0.4f);
-
-        /*
-        if (targetCheck()) {
-            return;
-        }
-
-        Vector2 currentPosition = this.gameObject.transform.position;
-        float distance = Vector2.Distance(aggroTarget.transform.position, currentPosition);
-        */
-        /*
-        if (infomation.range >= distance) {
-            Character attackTarget = target.GetComponent<Character>();
-            float damage = infomation.power;
-
-            if (attackType == (int)CharacterAttackType.Heal) {
-                attackTarget.heal(this.infomation.power);
-                if (attackTarget.currentHealthPoint >= attackTarget.infomation.healthPoint) {
-                    target = null;
-                } // 체력이 가득차서 타겟을 변경함
-
-            } else {
-                foreach (Skill buff in buffList) {
-                    damage += buff.infomation.energyPower;
-                }
-
-                foreach (Ability equipment in equipments) {
-                    damage += equipment.energyPower;
-                }
-
-                attackTarget.hit(damage);
-            }
-        } // 공격 성공
-        */
-        //runAfterDelay();
     }
 
     public void setNextAction(int inNextAction) {
@@ -225,19 +198,6 @@ public class Character : MonoBehaviour
     }
 
     private void runNextAction() {
-        /*
-        switch (this.nextAction) {
-            case (int)CharacterAction.Ultimate:
-                this.activeUltimateSkill();
-                break;
-            case (int)CharacterAction.Skill1:
-                this.activeSubSkill1();
-                break;
-            case (int)CharacterAction.Skill2:
-                this.activeSubSkill2();
-                break;
-        }*/
-
         this.action = nextAction;
     } // 다음 행동을 행함
 
@@ -302,6 +262,8 @@ public class Character : MonoBehaviour
         this.action = (int)Character.CharacterAction.Constraint;
         Invoke("clearAction", 0.5f);
         // addForce가 velocity와 곂치면 x축으로 힘을 받지않는 문제가 있어 행동 제약을 둠
+
+        sound.hitPlay();
 
         if (currentHealthPoint <= 0) {
             dead();
@@ -383,10 +345,17 @@ public class Character : MonoBehaviour
 
     private bool groundCheck() {
         float bottom = transform.position.y - characterCollider.bounds.extents.y;
-        RaycastHit2D rayObject = Physics2D.Raycast(new Vector2(transform.position.x, bottom), Vector2.down, 1.0f, LayerMask.GetMask("Platform"));
-        Debug.DrawLine(new Vector2(transform.position.x, bottom), new Vector2(transform.position.x, bottom - 1.0f));
+        RaycastHit2D centerRay = Physics2D.Raycast(new Vector2(transform.position.x, bottom), Vector2.down, 1.0f, LayerMask.GetMask("Platform"));
+        RaycastHit2D leftSideRay = Physics2D.Raycast(new Vector2(characterCollider.bounds.min.x, bottom), Vector2.down,1.0f,LayerMask.GetMask("Platform"));
+        RaycastHit2D rightSideRay = Physics2D.Raycast(new Vector2(characterCollider.bounds.max.x, bottom), Vector2.down,1.0f,LayerMask.GetMask("Platform"));
 
-        return rayObject.transform != null ? true : false;
+        Debug.DrawLine(new Vector2(transform.position.x, bottom), new Vector2(transform.position.x, bottom - 1.0f));
+        Debug.DrawLine(new Vector2(characterCollider.bounds.min.x, bottom),new Vector2(characterCollider.bounds.min.x, bottom - 1.0f));
+        Debug.DrawLine(new Vector2(characterCollider.bounds.max.x, bottom),new Vector2(characterCollider.bounds.max.x, bottom - 1.0f));
+
+        bool check = centerRay.transform != null || leftSideRay.transform != null || rightSideRay.transform != null;
+
+        return check;
     }
 
     public void jumpEnd() {
@@ -431,6 +400,8 @@ public class Character : MonoBehaviour
 
             clearAction();
             InvokeRepeating("jumpHolding", 0.0f, 0.01f);
+
+            sound.jumpPlay();
         }
     }
 

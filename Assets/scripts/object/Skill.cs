@@ -34,7 +34,7 @@ public class Skill :MonoBehaviour
     private skillCell currentSkill; // 현재 발동중인 스킬
     private bool activeFlag; // 스킬 사용 가능 여부
 
-    public ArrayList targetBuffList = new ArrayList();
+    public ArrayList targetBuffList;
     // 만일 이 스킬이 버프 스킬일 경우 자동으로 버프를 해제해야 함으로 그 버프리스트의 주소를 갖기위해 만든변수
 
     private GameObject allianceGroup;

@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Enemy : MonoBehaviour {
-    private Character character;
-
+public class Enemy :Character
+{
     /*
      1. 대상을 찾음
      2. 공격범위까지 다가감
@@ -12,20 +11,17 @@ public class Enemy : MonoBehaviour {
      */
 
     private void Start() {
-        character = this.GetComponent<Character>();
-        character.infomation.movementSpeed = character.infomation.movementSpeed / 2;
-        character.currentHealthPoint = 30;
     }
 
     private void movement() {
-        if (character.aggroTarget && character.action == (int)Character.CharacterAction.Battle) {
-            float directionCheck = this.transform.position.x - character.aggroTarget.position.x;
-            character.direction = directionCheck >= 0 ? -1 : 1;
-            character.move();
+        if (this.aggroTarget && this.action == (int)Character.CharacterAction.Battle) {
+            float directionCheck = this.transform.position.x - this.aggroTarget.position.x;
+            this.direction = directionCheck >= 0 ? -1 : 1;
+            this.move();
 
-            float distance = Vector2.Distance(this.transform.position, character.aggroTarget.position);
-            if (character.infomation.range >= distance) {
-                character.attack();
+            float distance = Vector2.Distance(this.transform.position,this.aggroTarget.position);
+            if (this.infomation.range >= distance) {
+                this.attack();
             }
         }
     }

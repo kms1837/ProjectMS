@@ -9,8 +9,6 @@ public class Ability
 
     public int level;
 
-    public int jobClass; // 직업
-
     /* total ability */
     public float healthPoint; // HP
     public float manaPoint; // MP
@@ -41,7 +39,6 @@ public class Ability
     public float heal; // 회복력
 
     public float aggroRange; // 인식 거리
-
 
     // skill Number
     public int passive;
@@ -76,8 +73,6 @@ public class Ability
         level = 1;
         healthPoint = 0; // HP
         manaPoint = 0; // MP
-
-        jobClass = 1;
 
         passive = 1;
         mainSkill = 1;

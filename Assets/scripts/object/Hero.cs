@@ -7,7 +7,6 @@ public class Hero : Ability {
         int setMainSkill, int setSideSkill) {
         nameStr = setName;
         level = setLevel;
-        jobClass = setJobClass;
         passive = setPassive;
         mainSkill = setMainSkill;
     }

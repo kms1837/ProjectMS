@@ -28,6 +28,7 @@ public class Npc :MonoBehaviour {
         Character player = collision.gameObject.GetComponent<Character>();
 
         if (Input.GetButtonDown("Action") && player.action == (int)Character.CharacterAction.Normal && dialogueUI != null) {
+            player.idle();
             player.action = (int)Character.CharacterAction.Event;
             dialogue(player);
         }

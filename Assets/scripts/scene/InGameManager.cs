@@ -52,6 +52,8 @@ public class InGameManager : MonoBehaviour {
     }
 
 	void Update () {
-        Camera.main.transform.position = cameraTarget.position - Vector3.forward;
+        if (cameraTarget != null) {
+            Camera.main.transform.position = cameraTarget.position - Vector3.forward;
+        }
     }
 }
