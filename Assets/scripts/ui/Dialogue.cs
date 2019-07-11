@@ -15,6 +15,8 @@ class DialogueObject
     public int type;
     public string name;
     public string message;
+    public string leftImg;
+    public string rightImg;
     public List<AnswerObject> answer;
     public string load; // 대화 종료후 다음 대화 스크립트를 설정합니다, 비어있으면 현행유지
 } // 대화 정보
@@ -30,6 +32,8 @@ class AnswerObject
 
 public class Dialogue : MonoBehaviour {
     public GameObject answerButton;
+    public AudioClip typingSound;
+    private AudioSource sound;
     private Transform answerButtonGroup;
 
     private Character eventTarget; // 이벤트 대상
@@ -40,6 +44,8 @@ public class Dialogue : MonoBehaviour {
     private int typingPoint;
     private bool keyReady;
 
+    private GameObject leftImage;
+    private GameObject rightImage;
     private Transform messagePanel;
     private Text messageLabel;
     private Text nameLabel;
@@ -47,6 +53,7 @@ public class Dialogue : MonoBehaviour {
     const float typingSpeed = 0.1f;
     const int minTyping = 5; // 어느정도 타이핑되야 스킵이 가능한지 설정
     const string dirPath = "json/dialogue/";
+    const string imgDirPath = "imgs/";
 
     public enum DialogueType { Normal, Question, End, Jump, Load };
     // Normal - 행동키를 누르면 다음으로 넘어감, question - 질문을 선택해야 다음으로 넘어감, End - 행동키를 누르면 대화가 종료됨, Jump - 해당인덱스 대화로 점프함, Load - 다른 파일의 대화를 불러옴
@@ -58,6 +65,10 @@ public class Dialogue : MonoBehaviour {
         messageLabel = messagePanel.Find("MessageLabel").GetComponent<Text>();
         nameLabel = messagePanel.Find("NameLabel").GetComponent<Text>();
         answerButtonGroup = this.transform.Find("AnswerButtonGroup");
+        sound = this.GetComponent<AudioSource>();
+
+        leftImage = this.transform.Find("LeftImage").gameObject;
+        rightImage = this.transform.Find("RightImage").gameObject;
     }
 	
 	void Update () {
@@ -136,6 +147,23 @@ public class Dialogue : MonoBehaviour {
         try {
             currentDialogue = scriptData.dialogue[setIndex];
             currentDialogueIndex = setIndex;
+
+            if (currentDialogue.rightImg != null) {
+                rightImage.SetActive(true);
+                rightImage.GetComponent<Image>().sprite = Resources.Load<Sprite>(imgDirPath + currentDialogue.rightImg);
+            }
+            else {
+                rightImage.SetActive(false);
+            }
+
+            if (currentDialogue.leftImg != null) {
+                leftImage.SetActive(true);
+                leftImage.GetComponent<Image>().sprite = Resources.Load<Sprite>(imgDirPath + currentDialogue.leftImg);
+            }
+            else {
+                leftImage.SetActive(false);
+            }
+
             runTyping();
         }
         catch (System.Exception e) {
@@ -165,6 +193,8 @@ public class Dialogue : MonoBehaviour {
 
         messageLabel.text += currentDialogue.message[typingPoint];
         typingPoint++;
+
+        sound.PlayOneShot(typingSound);
     }
 
     private void typingEnd() {

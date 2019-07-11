@@ -91,7 +91,6 @@ public class QuestBoard : MonoBehaviour
 
         mySpec = new Ability();
         mySpec.nameStr = "주인공";
-        mySpec.jobClass = 1;
         mySpec.mainSkill = 2;
         room.Add("OrderUser", 1);
 
@@ -205,7 +204,6 @@ public class QuestBoard : MonoBehaviour
         Text mainSkillLabel = mySpecUI.Find("MainSkillIcon").GetChild(1).GetComponent<Text>();
         
         nameLabel.text = mySpec.nameStr;
-        jobClassLabel.text = (string)jobClassList[mySpec.jobClass]["name"];
         levelLabel.text = string.Format("Lv.{0}", mySpec.level);
         mainSkillLabel.text = (string)skillList[mySpec.mainSkill]["name"];
         

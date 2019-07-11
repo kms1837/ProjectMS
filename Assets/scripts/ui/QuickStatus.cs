@@ -14,8 +14,7 @@ public class QuickStatus : MonoBehaviour {
     private Text hpText;
     private Text mpText;
     private Text expText;
-
-    // Use this for initialization
+    
     void Start() {
         targetStatus = target.GetComponent<Character>();
         hpBar = this.transform.Find("HPBar").GetComponent<StatusBar>();
@@ -29,8 +28,7 @@ public class QuickStatus : MonoBehaviour {
         mpText = this.transform.Find("MPText").GetComponent<Text>();
         expText = this.transform.Find("EXPText").GetComponent<Text>();
     }
-
-    // Update is called once per frame
+    
     void Update() {
         hpBar.setCurrent(targetStatus.currentHealthPoint);
         mpBar.setCurrent(targetStatus.currentManaPoint);
