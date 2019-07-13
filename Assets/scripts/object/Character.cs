@@ -73,7 +73,7 @@ public class Character : MonoBehaviour
 
     private CharacterSound sound;
 
-    void Awake() {
+    void Awake () {
         Vector2 objPosition = this.transform.position;
         Rect objRect = this.gameObject.GetComponent<RectTransform>().rect;
 

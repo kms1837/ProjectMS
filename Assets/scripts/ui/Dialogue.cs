@@ -106,11 +106,21 @@ public class Dialogue : MonoBehaviour {
         }
     }
 
-    public void startDialogue(string fileName, Character inEventTarget, Npc inEventNpc) {
+    public void startDialogue(string fileName) {
         if (messageLabel == null) {
             Start();
             keyReady = false;
         } // 비활성화 상태에서 대화시 실패 방지
+
+        loadJSon(fileName);
+        setDialogue(0);
+    }
+
+    public void startDialogue(string fileName, Character inEventTarget, Npc inEventNpc) {
+        if (messageLabel == null) {
+            Start();
+            keyReady = false;
+        }
 
         eventTarget = inEventTarget;
         eventNpc = inEventNpc;
@@ -119,7 +129,9 @@ public class Dialogue : MonoBehaviour {
     }
 
     public void endDialogue() {
-        eventTarget.action = (int)Character.CharacterAction.Normal;
+        if (eventTarget != null) {
+            eventTarget.action = (int)Character.CharacterAction.Normal;
+        }
 
         if (currentDialogue.load != null && currentDialogue.load.Length > 0) {
             eventNpc.dialogueFileName = currentDialogue.load;
