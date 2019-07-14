@@ -72,7 +72,7 @@ public class Dialogue : MonoBehaviour {
     }
 	
 	void Update () {
-        if (Input.GetButtonUp("Action") && keyReady) {
+        if ((Input.GetButtonUp("Action") || Input.GetMouseButtonDown(0)) && keyReady) {
             if (typingPoint < currentDialogue.message.Length) {
                 typingEnd();
             }
