@@ -10,6 +10,12 @@ using tupleType = System.Collections.Generic.Dictionary<string, object>;
 [CustomEditor(typeof(Character))]
 public class Character : MonoBehaviour
 {
+    public enum CharacterAction { Normal, Battle, Attack,  Event, Control, Wait, BeforeDelay, AfterDelay, Constraint, Ultimate, Skill }
+    // 평상시, 전투모드, 공격중, 이벤트중, 조작중, 대기중, 선딜레이중, 후딜레이중, 행동제약, 궁극기사용중, 스킬 사용중
+
+    public enum CharacterType { Hero, NPC, Monster, Boss }
+    public enum CharacterAttackType { Attack, Heal }
+
     public Ability infomation; // 케릭터 정보
     public int action; // 케릭터 행동(이동, 공격 등)
     public int status; // 케릭터 상태(화상, 빙결 등)
@@ -33,11 +39,6 @@ public class Character : MonoBehaviour
     public float direction; // 방향
     private int originDirection; // 평소 이동 방향
 
-    public enum CharacterAction { Normal, Battle, Attack,  Event, Control, Wait, BeforeDelay, AfterDelay, Constraint, Ultimate, Skill }
-    // 평상시, 전투모드, 공격중, 이벤트중, 조작중, 대기중, 선딜레이중, 후딜레이중, 행동제약, 궁극기사용중, 스킬 사용중
-
-    public enum CharacterType { Hero, NPC, Monster, Boss }
-    public enum CharacterAttackType { Attack, Heal }
 
     private string beforeDelayActionStr; // 선딜레이 중인 함수 이름(invoke 중인 상태)
 
@@ -64,6 +65,9 @@ public class Character : MonoBehaviour
     private int prevAction; // 전 상태
 
     // object
+    private Transform objectGroup; // 캐릭터내 Sprite나 충돌처리 관련 그룹
+    private Transform uiGroup; // 캐릭터내 ui object 그룹
+
     private Rigidbody2D rigidbody;
     private BoxCollider2D characterCollider;
     private Animator animator;
@@ -74,10 +78,13 @@ public class Character : MonoBehaviour
         Vector2 objPosition = this.transform.position;
         Rect objRect = this.gameObject.GetComponent<RectTransform>().rect;
 
+        objectGroup = this.transform.Find("Object");
+        uiGroup = this.transform.Find("UI");
+
         rigidbody = this.GetComponent<Rigidbody2D>();
         characterCollider = this.GetComponent<BoxCollider2D>();
-        animator = this.GetComponent<Animator>();
-        sound = this.GetComponent<CharacterSound>();
+        animator = this.objectGroup.GetComponent<Animator>();
+        sound = this.objectGroup.GetComponent<CharacterSound>();
 
         infomation = new Ability();
 
@@ -103,7 +110,9 @@ public class Character : MonoBehaviour
 
         beforeDelayActionStr = string.Empty;
 
-        hpBar = this.transform.Find("HPBar").GetComponent<StatusBar>();
+        
+
+        hpBar = uiGroup.Find("HPBar").GetComponent<StatusBar>();
 
         hpBar.init(currentHealthPoint, new Color(1, 0, 0));
 
@@ -126,7 +135,10 @@ public class Character : MonoBehaviour
         Vector2 objPosition = this.transform.position;
 
         try {
-             hpBar.setCurrent(currentHealthPoint);
+            if (hpBar.gameObject.activeSelf) {
+                hpBar.setCurrent(currentHealthPoint);
+            }
+            
         } catch (NullReferenceException err) {
             Debug.Log(err);
         }
@@ -137,10 +149,10 @@ public class Character : MonoBehaviour
     }
 
     public void setSprite(string filePath) {
-        Transform spriteObject = this.transform.Find("Sprite");
+        Transform spriteObject = this.objectGroup.Find("Sprite");
         SpriteRenderer setSprite = spriteObject.GetComponent<SpriteRenderer>();
         Sprite loadSprite = Resources.Load<Sprite>(filePath);
-        RectTransform setSize = this.transform.Find("Sprite").GetComponent<RectTransform>();
+        RectTransform setSize = this.objectGroup.Find("Sprite").GetComponent<RectTransform>();
 
         float setHeight = loadSprite.rect.height * (baseWidth / loadSprite.rect.width);
 
@@ -151,7 +163,7 @@ public class Character : MonoBehaviour
     public void setSprite(string filePath, Vector2 size) {
         setSprite(filePath);
 
-        RectTransform setSize = this.transform.Find("Sprite").GetComponent<RectTransform>();
+        RectTransform setSize = this.objectGroup.Find("Sprite").GetComponent<RectTransform>();
         setSize.sizeDelta = size;
     }
 
@@ -237,15 +249,19 @@ public class Character : MonoBehaviour
     }
 
     public void heal(float healPower) {
-        this.transform.Find("Sprite").GetComponent<SpriteRenderer>().color = new Color(0, 255, 0);
+        this.objectGroup.Find("Sprite").GetComponent<SpriteRenderer>().color = new Color(0, 255, 0);
         Invoke("colorClear", 0.1f);
 
         this.currentHealthPoint = this.currentHealthPoint >= this.infomation.healthPoint ? this.infomation.healthPoint : this.currentHealthPoint + healPower;
     } // 회복받음
 
     public void hit(float damage, float attackDirection) {
-        this.transform.Find("Sprite").GetComponent<SpriteRenderer>().color = new Color(255, 0, 0);
+        this.objectGroup.Find("Sprite").GetComponent<SpriteRenderer>().color = new Color(255, 0, 0);
+        CancelInvoke("uiClear");
         Invoke("colorClear", 0.1f);
+        Invoke("uiClear", 1.0f);
+
+        hpBar.gameObject.SetActive(true);
 
         cancelCurrentBeforeDelay();
 
@@ -274,7 +290,11 @@ public class Character : MonoBehaviour
     }
 
     private void colorClear() {
-        this.transform.Find("Sprite").GetComponent<SpriteRenderer>().color = new Color(255, 255, 255);
+        this.objectGroup.Find("Sprite").GetComponent<SpriteRenderer>().color = new Color(255, 255, 255);
+    }
+
+    private void uiClear() {
+        this.hpBar.gameObject.SetActive(false);
     }
 
     private bool targetCheck() {
@@ -298,7 +318,7 @@ public class Character : MonoBehaviour
         
         Vector2 currentPosition = this.transform.position;
         float spriteDirection = this.direction > 0 ? 1 : -1;
-        this.transform.localScale = new Vector3(spriteDirection, 1, 1);
+        this.objectGroup.localScale = new Vector3(spriteDirection, 1, 1);
         float totalSpeed = infomation.movementSpeed;
 
         if (isRun) {
@@ -504,7 +524,7 @@ public class Character : MonoBehaviour
 
         if (collision.transform.tag == "Character" && groupNumber != collisionObj.groupNumber) {
             float damage = collisionObj.infomation.power;
-            this.hit(damage, this.transform.localScale.x * -1);
+            this.hit(damage, this.objectGroup.localScale.x * -1);
         } // 같은그룹 공격 불가 판정
 
         if (collision.transform.tag == "Platform") {
@@ -516,10 +536,14 @@ public class Character : MonoBehaviour
     }// 서로 충돌시
 
     private void OnTriggerEnter2D (Collider2D collision) {
-        Character collisionObj = collision.transform.parent.GetComponent<Character>();
+        if (collision.tag != "Hitbox") {
+            return;
+        }
 
-        if (collision.tag == "Hitbox" && groupNumber != collisionObj.groupNumber) {
-            float damage = collision.transform.parent.GetComponent<Character>().infomation.power;
+        Character collisionObj = collision.transform.parent.parent.GetComponent<Character>();
+
+        if (this.groupNumber != collisionObj.groupNumber) {
+            float damage = collisionObj.infomation.power;
             this.hit(damage, collision.transform.parent.localScale.x);
         } // 같은그룹 공격 불가 판정
     }// 히트박스에 충돌

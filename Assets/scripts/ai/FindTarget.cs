@@ -13,15 +13,21 @@ public class FindTarget : MonoBehaviour {
     }
 
     void OnTriggerEnter2D(Collider2D target) {
-        if (!targetGroup) {
-            return;
-        }
+        try {
+            if (!targetGroup) {
+                return;
+            }
+            
+            if (target.transform.IsChildOf(targetGroup.transform) && (target.tag == "Character" || target.tag == "Player")) {
+                Character character = this.transform.parent.parent.GetComponent<Character>();
+                character.setAggroTarget(target.transform);
+                character.action = (int)Character.CharacterAction.Battle;
+            }
 
-        if (target.transform.IsChildOf(targetGroup.transform) && (target.tag == "Character" || target.tag == "Player")) {
-            Character character = this.transform.parent.GetComponent<Character>();
-            character.setAggroTarget(target.transform);
-            character.action = (int)Character.CharacterAction.Battle;
-        };
+        }
+        catch (Exception e) {
+            Debug.Log(e);
+        }
     }
 
     // 목표 대상을 찾습니다.
