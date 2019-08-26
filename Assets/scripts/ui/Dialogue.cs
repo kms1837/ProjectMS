@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 [System.Serializable]
 class ScriptObject
@@ -94,11 +95,17 @@ public class Dialogue : MonoBehaviour {
         switch (currentDialogue.type) {
             case (int)Dialogue.DialogueType.Normal:
                 currentDialogueIndex = currentDialogueIndex + 1;
-                setDialogue(currentDialogueIndex);
+                if (currentDialogueIndex < scriptData.dialogue.Count) {
+                    setDialogue(currentDialogueIndex);
+                } else {
+                    SceneManager.LoadScene("battle_ground");
+                    //스크립트의 종료
+                }
                 break;
             case (int)Dialogue.DialogueType.Jump:
                 break;
             case (int)Dialogue.DialogueType.Load:
+                SceneManager.LoadScene(scriptData.dialogue[currentDialogueIndex].load);
                 break;
             case (int)Dialogue.DialogueType.End:
                 endDialogue();

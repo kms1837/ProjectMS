@@ -8,7 +8,7 @@ public class Event : MonoBehaviour
 
     void Start()
     {
-        PlayerStats.EventFilePath = "test";
+        PlayerStats.EventFilePath = "prototype";
         dialogueUI.SetActive(true);
         dialogueUI.GetComponent<Dialogue>().startDialogue(PlayerStats.EventFilePath);
     }

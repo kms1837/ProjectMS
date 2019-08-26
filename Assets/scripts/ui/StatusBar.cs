@@ -7,8 +7,14 @@ using UnityEngine.UI;
 public class StatusBar : MonoBehaviour
 {
     private bool guiFlag = false; // onGUI flag
+    public bool spriteFlag;
     public Vector2 position; // onGUI ver option
 
+    // Sprite
+    private Transform barObjet;
+    private Transform moveBarObjet;
+
+    // Canvas UI
     private Image barImg;
     private Image moveBarImg;
 
@@ -66,9 +72,15 @@ public class StatusBar : MonoBehaviour
         current = setValue;
         barColor = inColor;
 
-        barImg = this.transform.Find("Bar").GetComponent<Image>();
-        moveBarImg = this.transform.Find("MoveBar").GetComponent<Image>();
-        barImg.color = barColor;
+        barObjet = this.transform.Find("Bar");
+        moveBarObjet = this.transform.Find("MoveBar");
+
+        barImg = barObjet.GetComponent<Image>();
+        moveBarImg = moveBarObjet.GetComponent<Image>();
+
+        if (!spriteFlag) {
+            barImg.color = barColor;
+        }
     }
 
     public void init(bool mode, float setValue, Vector2 setPosition, Vector2 setSize, Color inColor) {
@@ -107,10 +119,18 @@ public class StatusBar : MonoBehaviour
             moveBarEndPoint = movePoint < 0 ? (origin / maximum) : (current / maximum);
             barEndPoint = movePoint < 0 ? (current / maximum) : (origin / maximum);
         }
+        
 
-        if (barImg != null && moveBarImg != null) {
-            moveBarImg.fillAmount = moveBarEndPoint;
-            barImg.fillAmount = barEndPoint;
+        if (spriteFlag) {
+            if (barObjet != null && moveBarObjet != null) {
+                moveBarObjet.localScale = new Vector2(moveBarEndPoint, moveBarObjet.transform.localScale.y);
+                barObjet.localScale = new Vector2(barEndPoint, barObjet.transform.localScale.y);
+            }
+        } else {
+            if (barImg != null && moveBarImg != null) {
+                moveBarImg.fillAmount = moveBarEndPoint;
+                barImg.fillAmount = barEndPoint;
+            }
         }
     }
 

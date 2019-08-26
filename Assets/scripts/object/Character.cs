@@ -46,14 +46,11 @@ public class Character : MonoBehaviour
 
     public ArrayList buffList; // 버프, 디버프 리스트
 
-    // Skill Objects
-    public Skill ultimateSkillObj;
-    public Skill subSkillObj1;
-    public Skill subSkillObj2;
+    public Skill[] skills; // Skill Objects
 
     // ui
-    public ArrayList hpBar; // hpbar ui 목록
-    public ArrayList delayBar; // hpbar ui 목록
+    public StatusBar hpBar;
+    public StatusBar delayBar;
 
     public UnityEngine.Events.UnityAction destroyCallback; // 케릭터 사망시 콜백 설정
 
@@ -106,8 +103,9 @@ public class Character : MonoBehaviour
 
         beforeDelayActionStr = string.Empty;
 
-        hpBar = new ArrayList();
-        delayBar = new ArrayList();
+        hpBar = this.transform.Find("HPBar").GetComponent<StatusBar>();
+
+        hpBar.init(currentHealthPoint, new Color(1, 0, 0));
 
         buffList = new ArrayList();
         equipments = new Ability[5];
@@ -128,9 +126,7 @@ public class Character : MonoBehaviour
         Vector2 objPosition = this.transform.position;
 
         try {
-            foreach (StatusBar bar in hpBar) {
-                bar.setCurrent(currentHealthPoint);
-            }
+             hpBar.setCurrent(currentHealthPoint);
         } catch (NullReferenceException err) {
             Debug.Log(err);
         }
@@ -222,11 +218,9 @@ public class Character : MonoBehaviour
     }
 
     private void delay(float time, int setStatus, Color delayColor, string callBack) {
-        foreach (StatusBar bar in delayBar) {
-            bar.setMaximum(time);
-            bar.setColor(delayColor);
-            bar.runProgress();
-        }
+        delayBar.setMaximum(time);
+        delayBar.setColor(delayColor);
+        delayBar.runProgress();
 
         this.action = setStatus;
 
@@ -235,9 +229,7 @@ public class Character : MonoBehaviour
 
     public void cancelCurrentBeforeDelay() {
         if (beforeDelayActionStr != string.Empty) {
-            foreach (StatusBar bar in delayBar) {
-                bar.stopProgress();
-            }
+            delayBar.stopProgress();
 
             CancelInvoke(beforeDelayActionStr);
             beforeDelayActionStr = string.Empty;
@@ -471,9 +463,7 @@ public class Character : MonoBehaviour
             this.action = (int)CharacterAction.Attack;
             beforeDelayActionStr = "attack";
 
-            foreach (StatusBar bar in delayBar) {
-                bar.setMaximum(infomation.beforeDelay);
-            }
+            delayBar.setMaximum(infomation.beforeDelay);
 
             CancelInvoke(beforeDelayActionStr);
             runBeforeDelay();
@@ -498,30 +488,6 @@ public class Character : MonoBehaviour
 
         return result;
     } // 행동이 가능한지 체크하고 행동이 불가능하면 이전 행동으로 되돌림
-
-    public bool activeUltimateSkill() {
-        if (actionCheck()) {
-            return false;
-        }
-
-        return ultimateSkillObj.activation();
-    } // 메인 스킬 발동
-
-    public bool activeSubSkill1() {
-        if (actionCheck()) {
-            return false;
-        }
-
-        return subSkillObj1.activation();
-    } // 서브 스킬1 발동
-
-    public bool activeSubSkill2() {
-        if (actionCheck()) {
-            return false;
-        }
-
-        return subSkillObj2.activation();
-    } // 서브 스킬2 발동
 
     public void setAggroTarget(Transform target) {
         if (this.action == (int)Character.CharacterAction.Normal) {

@@ -14,7 +14,7 @@ public class UIController :MonoBehaviour
     
     void Update() {
         if (Input.GetButtonDown("Equipment")) {
-            EquipmentUI.SetActive(!EquipmentUI.activeSelf);
+            //EquipmentUI.SetActive(!EquipmentUI.activeSelf);
         }
 
         if (Input.GetButtonDown("Inventory")) {
