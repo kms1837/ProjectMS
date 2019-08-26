@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Score {
-    public Dictionary<int, int> killPoint;
+    public Dictionary<int, int> killScore; // 몬스터 사냥 점수
+    public Dictionary<int,int> skillScore;
 
     public Score () {
-        killPoint = new Dictionary<int, int>();
+        killScore = new Dictionary<int, int>();
+        skillScore = new Dictionary<int,int>();
     }
 }

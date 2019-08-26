@@ -6,9 +6,11 @@ public class InGameManager : MonoBehaviour {
     private GameObject Map;
     private GameObject npcGroup;
     private GameObject enemyGroup;
+    public GameObject quickUIGroup;
     private int currentLayer; // 시작레이어(0-밖, 1-안)
 
-    public Transform cameraTarget; // 카메라가 따라다닐 대상
+    [SerializeField]
+    private Transform cameraTarget; // 카메라가 따라다닐 대상
     private GameObject background;
 
     private void childsLayerActive(GameObject group) {
@@ -46,6 +48,7 @@ public class InGameManager : MonoBehaviour {
         Map = GameObject.Find("Map");
         npcGroup = GameObject.Find("NpcGroup");
         enemyGroup = GameObject.Find("EnemyGroup");
+        quickUIGroup = GameObject.Find("Canvas").transform.Find("QuickUI").gameObject;
 
         background = Camera.main.transform.Find("Background").gameObject;
         childsLayerActive();

@@ -31,6 +31,7 @@ public class Skill :MonoBehaviour
     }
 
     private Dictionary<string, skillCell> skillSet;
+    private Dictionary<string, int> learnSet; // 습득 조건
     private skillCell currentSkill; // 현재 발동중인 스킬
     private bool activeFlag; // 스킬 사용 가능 여부
 
@@ -45,8 +46,6 @@ public class Skill :MonoBehaviour
     private Character user; // 스킬 사용자
 
     private int loopCount;
-    private bool ultimateFlag;
-    public bool orderFlag;
 
     public int id; // 중복검사를 하기 위해 id값을 가짐
     public Ability infomation;
@@ -56,28 +55,61 @@ public class Skill :MonoBehaviour
     public ArrayList coolTimeBar;
 
     public enum SkillType { Heal, Buff, Physical, Magic, Debuff, Condition }
-    private enum SkillTargetType { Single, Broadcast, Self }
+    private enum SkillTargetType { Single, Broadcast, Self, Projectile }
 
-    public void coolTImeBarSetting(StatusBar barObject, Color barColor) {
-        barObject.init(this.coolTime, new Color(255.0f, 255.0f, 255.0f));
+    public static Skill addSkill(GameObject target, int skillID) {
+        DataBase db = new DataBase("MS");
+        Skill newSkill = target.AddComponent<Skill>();
+        tupleType skillData = db.getTuple("skills", skillID);
+
+        newSkill.infomation.beforeDelay = (float)skillData["before_delay"];
+        newSkill.infomation.afterDelay = (float)skillData["after_delay"];
+        newSkill.infomation.power = (float)skillData["power"];
+        newSkill.infomation.nameStr = (string)skillData["name"];
+        newSkill.infomation.manaPoint = (float)skillData["mana"];
+
+        newSkill.id = (int)skillData["id"];
+        newSkill.coolTime = (float)skillData["cool_time"];
+        newSkill.iconSprite = Resources.Load<Sprite>((string)skillData["icon"]);
+
+        newSkill.skillSet = newSkill.loadScript((string)skillData["script"]);
+
+        db.closeDB();
+        db = null;
+
+        return newSkill;
+    } // 스킬을 생성하고 설정합니다.
+
+    public void coolTImeBarSetting(ProgressBar progress, Color barColor) {
+        progress.init(this.coolTime, new Color(255.0f, 255.0f, 255.0f));
+        coolTimeBar.Add(progress);
     }
 
-    public void setting(tupleType skillData, GameObject setAllianceGroup, GameObject setEnemyGroup, bool setUltimate) {
-        this.infomation.beforeDelay = (float)skillData["before_delay"];
-        this.infomation.afterDelay = (float)skillData["after_delay"];
-        this.infomation.power = (float)skillData["power"];
-        this.infomation.nameStr = (string)skillData["name"];
+    private Dictionary<string,int> loadLearnSet(string fileName) {
+        JSONObject loadedScript = null;
+        // Key값으로 스킬들을 구분하고 있어 외부 라이브러리와 섞어 사용함.
+        Dictionary<string,int> learnSet = new Dictionary<string,int>();
 
-        this.id = (int)skillData["id"];
-        this.coolTime = (float)skillData["cool_time"];
-        this.iconSprite = Resources.Load<Sprite>((string)skillData["icon"]);
+        try {
+            TextAsset jsonText = Resources.Load(string.Format("json/skill/{0}",fileName)) as TextAsset;
+            loadedScript = new JSONObject(jsonText.text);
 
-        Debug.Log(infomation.nameStr);
+            if (!object.ReferenceEquals(loadedScript["main"]["learn"],null)) {
+                foreach (string key in loadedScript["main"]["learn"].keys) {
+                    int learnPoint = int.Parse(loadedScript["main"]["learn"].GetField(key).ToString());
+                    learnSet.Add(key,learnPoint);
+                }
+            }
+            else {
+                return null;
+            }
+        }
+        catch (System.Exception error) {
+            Debug.LogError(string.Format("Load Fail : json/skill/{0}",fileName));
+            Debug.LogError(error);
+        }
 
-        skillSet = loadScript((string)skillData["script"]);
-        allianceGroup = setAllianceGroup;
-        enemyGroup = setEnemyGroup;
-        ultimateFlag = setUltimate;
+        return learnSet;
     }
 
     private Dictionary<string, skillCell> loadScript(string fileName) {
@@ -108,47 +140,112 @@ public class Skill :MonoBehaviour
         Debug.Log("스킬-" + this.infomation.nameStr + "발동시도");
 
         if (!activeFlag) {
-            if (!ultimateFlag) {
-                Debug.Log("coolTime: " + coolTime);
-            }
-            else {
-                Debug.Log("궁극기 사용 대기");
-            }
-            
+            Debug.LogWarning("쿨타임");
             return false;
         }
 
-        if (skillSet["main"].target == (int)SkillTargetType.Single && user.aggroTarget == null) {
+        bool state = true;
+
+        if (this.infomation.manaPoint > user.currentManaPoint) {
+            Debug.LogWarning("마나가 부족합니다.");
+            return false;
+        }
+
+        user.currentManaPoint -= this.infomation.manaPoint;
+
+        switch (skillSet["main"].target) {
+            case (int)SkillTargetType.Single:
+                state = singleActivation();
+                break;
+            case (int)SkillTargetType.Self:
+                state = selfActivation();
+                break;
+            case (int)SkillTargetType.Projectile:
+                state = projectileActivation();
+                break;
+        }
+        
+        activeFlag = false;
+        
+        foreach (ProgressBar bar in this.coolTimeBar) {
+            bar.setColor(new Color(255.0f, 255.0f, 255.0f));
+            bar.runProgress();
+        }
+
+
+        if (PlayerStats.GlobalScore.skillScore.ContainsKey(this.id)) {
+            PlayerStats.GlobalScore.skillScore[id] += 1;
+        } else {
+            PlayerStats.GlobalScore.skillScore.Add(this.id, 1);
+        }
+        
+        learnSkill();
+
+        this.Invoke("recycle", coolTime);
+
+        return state;
+    } // 스킬 발동
+
+    private void learnSkill() {
+        DataBase db = new DataBase("MS");
+        Dictionary<int, tupleType> skillList = db.getList("skills");
+
+        foreach(int key in skillList.Keys) {
+            bool learnFlag = true;
+            tupleType skillData = skillList[key];
+            Dictionary<string, int> learnSet = loadLearnSet((string)skillData["script"]);
+
+            if (!object.ReferenceEquals(learnSet, null) ) {
+                foreach (string learnKey in learnSet.Keys) {
+                    int skillID = int.Parse(learnKey);
+                    if (learnSet[learnKey] > PlayerStats.GlobalScore.skillScore[skillID]) {
+                        learnFlag = false;
+                        break;
+                    }
+                }
+
+                if (learnFlag) {
+                    Skill newSkill = Skill.addSkill(user.gameObject, key);
+                    GameObject quickUIGroup = GameObject.Find("GameSystem").GetComponent<InGameManager>().quickUIGroup;
+                    QuickSkills quickSkill = quickUIGroup.transform.Find("QuickSkills").GetComponent<QuickSkills>();
+                    quickSkill.setSlotSkill(1, newSkill);
+                }
+            }
+        }
+
+        db.closeDB();
+        db = null;
+    } // 스킬 습득
+
+    private bool singleActivation() {
+        if (user.aggroTarget == null) {
             Debug.Log("target unknown");
             return false;
         } // 스킬 발동가능여부 검사(타겟 탐색)
 
-        if (orderFlag) {
-            skillCellActive(skillSet["order"]);
-            this.orderFlag = false;
-        } else {
-            skillCellActive(skillSet["main"]);
-        }
-        
-        activeFlag = false;
+        return true;
+    } // 1인 타켓팅 스킬
 
-        if (!ultimateFlag) {
-            foreach (StatusBar bar in this.coolTimeBar) {
-                bar.setColor(new Color(255.0f, 255.0f, 255.0f));
-                bar.runProgress();
-            }
+    private bool selfActivation() {
+        switch (skillSet["main"].type) {
+            case (int)SkillType.Heal:
+                user.heal(this.infomation.power);
+                break;
+            case (int)SkillType.Buff:
+                break;
+        }
+        return true;
+    } // 자신에게 사용하는 스킬
 
-            this.Invoke("recycle", coolTime);
-        }
-        else {
-            foreach (StatusBar bar in this.coolTimeBar) {
-                bar.setColor(new Color(255.0f, 255.0f, 255.0f));
-                bar.stopProgress();
-            }
-        }
+    private bool projectileActivation() {
+        GameObject projectileObj = Resources.Load("prefab/object/Projectile") as GameObject;
+        GameObject newProjectile = Instantiate(projectileObj,user.transform.position,Quaternion.identity);
+        Projectile projectileSet = newProjectile.GetComponent<Projectile>();
+        projectileSet.infomation.power = this.infomation.power;
+        projectileSet.direction = user.transform.Find("Object").localScale.x;
 
         return true;
-    } // 스킬 발동
+    } // 투사체 발사 스킬
 
     private void healSkill() {
         Character targetInfo;

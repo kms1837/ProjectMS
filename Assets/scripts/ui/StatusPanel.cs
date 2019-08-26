@@ -7,9 +7,9 @@ public class StatusPanel : MonoBehaviour {
     public GameObject target;
     private Character targetStatus;
 
-    private StatusBar hpBar;
-    private StatusBar mpBar;
-    private StatusBar expBar;
+    private ProgressBar hpBar;
+    private ProgressBar mpBar;
+    private ProgressBar expBar;
 
     private Text hpText;
     private Text mpText;
@@ -25,17 +25,17 @@ public class StatusPanel : MonoBehaviour {
     void Start () {
         targetStatus = target.GetComponent<Character>();
         Transform hpForm = this.transform.Find("HPForm");
-        hpBar = hpForm.Find("HPBar").GetComponent<StatusBar>();
+        hpBar = hpForm.Find("HPBar").GetComponent<ProgressBar>();
         hpBar.init(targetStatus.infomation.healthPoint, new Color(1, 0, 0));
         hpText = hpForm.Find("HPText").GetComponent<Text>();
 
         Transform mpForm = this.transform.Find("MPForm");
-        mpBar = mpForm.Find("MPBar").GetComponent<StatusBar>();
+        mpBar = mpForm.Find("MPBar").GetComponent<ProgressBar>();
         mpBar.init(targetStatus.infomation.manaPoint, new Color(0, 0, 1));
         mpText = mpForm.Find("MPText").GetComponent<Text>();
 
         Transform expForm = this.transform.Find("EXPForm");
-        expBar = expForm.Find("EXPBar").GetComponent<StatusBar>();
+        expBar = expForm.Find("EXPBar").GetComponent<ProgressBar>();
         expBar.init(0, new Color(0, 1, 0));
         expText = expForm.Find("EXPText").GetComponent<Text>();
 

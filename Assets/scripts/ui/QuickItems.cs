@@ -5,14 +5,23 @@ using UnityEngine.UI;
 
 public class QuickItems :MonoBehaviour
 {
-    public Character target;
+    [SerializeField]
+    private Character target;
+
+    private Transform[] slotObject;
     private Item[] slotItem;
     private Text[] stackLabel;
 
     void Start() {
+        if (object.ReferenceEquals(target, null)) {
+            return;
+        }
+
         int index = 0;
         stackLabel = new Text[3];
+        slotObject = new Transform[3];
         foreach (Transform slot in this.transform) {
+            slotObject[index] = slot;
             stackLabel[index] = slot.Find("Text").GetComponent<Text>();
             index++;
         }
@@ -27,6 +36,8 @@ public class QuickItems :MonoBehaviour
         if (setSlot >= 0 && setSlot < 3 && setItem != null) {
             slotItem[setSlot] = setItem;
             stackLabel[setSlot].text = setItem.ItemStack > 0 ? setItem.ItemStack.ToString() : "";
+
+            slotObject[setSlot].GetComponent<ProgressBar>().init(1, new Color(255.0f,255.0f,255.0f));
         }
     }
 
@@ -48,6 +59,11 @@ public class QuickItems :MonoBehaviour
         if (slotItem[usingSlot] != null) {
             slotItem[usingSlot].use();
             stackLabel[usingSlot].text = slotItem[usingSlot].ItemStack > 0 ? slotItem[usingSlot].ItemStack.ToString() : "";
+
+            if (slotItem[usingSlot].ItemStack <= 0) {
+                slotObject[usingSlot].Find("Bar").gameObject.SetActive(false);
+                slotObject[usingSlot].Find("MoveBar").gameObject.SetActive(false);
+            }
         }   
     }
 }

@@ -32,18 +32,13 @@ public class DataBase {
 
     public void initDataBase() {
         string sql;
-
-        sql = readerSQLFile("users");
-        query(sql);
         sql = readerSQLFile("skills");
         query(sql);
         sql = readerSQLFile("monsters");
         query(sql);
-        sql = readerSQLFile("jobclass");
-        query(sql);
         sql = readerSQLFile("places");
         query(sql);
-        sql = readerSQLFile("threats");
+        sql = readerSQLFile("quest");
         query(sql);
 
         dbcmd.Dispose();

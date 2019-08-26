@@ -39,7 +39,6 @@ public class Character : MonoBehaviour
     public float direction; // 방향
     private int originDirection; // 평소 이동 방향
 
-
     private string beforeDelayActionStr; // 선딜레이 중인 함수 이름(invoke 중인 상태)
 
     public ArrayList inventory;
@@ -47,11 +46,11 @@ public class Character : MonoBehaviour
 
     public ArrayList buffList; // 버프, 디버프 리스트
 
-    public Skill[] skills; // Skill Objects
+    public ArrayList skills; // Skill Objects
 
     // ui
-    public StatusBar hpBar;
-    public StatusBar delayBar;
+    public ProgressBar hpBar;
+    public ProgressBar delayBar;
 
     public UnityEngine.Events.UnityAction destroyCallback; // 케릭터 사망시 콜백 설정
 
@@ -110,13 +109,17 @@ public class Character : MonoBehaviour
 
         beforeDelayActionStr = string.Empty;
 
-        
-
-        hpBar = uiGroup.Find("HPBar").GetComponent<StatusBar>();
+        hpBar = uiGroup.Find("HPBar").GetComponent<ProgressBar>();
 
         hpBar.init(currentHealthPoint, new Color(1, 0, 0));
 
         buffList = new ArrayList();
+
+        skills = new ArrayList();
+        skills.Add(Skill.addSkill(this.gameObject, 17));
+        skills.Add(Skill.addSkill(this.gameObject, 2));
+        skills.Add(Skill.addSkill(this.gameObject, 18));
+
         equipments = new Ability[5];
 
         inventory = new ArrayList();
@@ -536,15 +539,25 @@ public class Character : MonoBehaviour
     }// 서로 충돌시
 
     private void OnTriggerEnter2D (Collider2D collision) {
-        if (collision.tag != "Hitbox") {
-            return;
+        switch (collision.tag) {
+            case "Hitbox": {
+                Character collisionObj = collision.transform.parent.parent.GetComponent<Character>();
+
+                if (this.groupNumber != collisionObj.groupNumber) {
+                    float damage = collisionObj.infomation.power;
+                    this.hit(damage, collision.transform.parent.localScale.x);
+                } // 같은그룹 공격 불가 판정
+                break;
+            }
+            case "Projectile": {
+                Projectile projectileObj = collision.transform.GetComponent<Projectile>();
+
+                if (this.groupNumber != projectileObj.groupNumber) {
+                    projectileObj.hit(this);
+                } // 같은그룹 공격 불가 판정
+                break;
+            }
         }
 
-        Character collisionObj = collision.transform.parent.parent.GetComponent<Character>();
-
-        if (this.groupNumber != collisionObj.groupNumber) {
-            float damage = collisionObj.infomation.power;
-            this.hit(damage, collision.transform.parent.localScale.x);
-        } // 같은그룹 공격 불가 판정
     }// 히트박스에 충돌
 }

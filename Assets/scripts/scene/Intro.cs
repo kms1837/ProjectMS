@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 public class Intro : MonoBehaviour {
     public Transform[] FadeImages;
     private int fadeIndex;
-    // Use this for initialization
+
     void Start () {
         fadeIndex = 0;
 
@@ -15,9 +15,11 @@ public class Intro : MonoBehaviour {
             PlayerPrefs.SetInt("firstRun", 1);
             PlayerPrefs.Save();
 
-            DataBase db = new DataBase("DT");
-            db.initDataBase();
-            db.closeDB();
+            DataBase ms = new DataBase("MS");
+            ms.initDataBase();
+            ms.closeDB();
+            ms = null;
+            Debug.Log("init Database");
         }
 
         Fader fader = FadeImages[fadeIndex].GetComponent<Fader>();

@@ -14,5 +14,14 @@ public static class PlayerStats
             eventFilePath = value;
         }
     }
+
+    private static Score globalScore = new Score();
+
+    public static Score GlobalScore
+    {
+        get {
+            return globalScore;
+        }
+    }
 }
 // 플레이어의 상태 및 업적을 저장하는 정적 클래스

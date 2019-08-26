@@ -8,6 +8,7 @@ TagManager:
   - Platform
   - Hitbox
   - NonPlayer
+  - Projectile
   layers:
   - Default
   - TransparentFX

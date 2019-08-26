@@ -96,10 +96,10 @@ public class Map
             case "hunt":
                 int huntedCount = 0;
                 foreach (int huntedMonsterNumber in trigerObj.monsterList) {
-                    if (checkScore.killPoint.ContainsKey(huntedMonsterNumber)) {
-                        huntedCount += checkScore.killPoint[huntedMonsterNumber];
+                    if (checkScore.killScore.ContainsKey(huntedMonsterNumber)) {
+                        huntedCount += checkScore.killScore[huntedMonsterNumber];
 
-                        result.logs.Add(huntedMonsterNumber + ": (" + checkScore.killPoint[huntedMonsterNumber] + "/" + trigerObj.count + ") 사냥됨.");
+                        result.logs.Add(huntedMonsterNumber + ": (" + checkScore.killScore[huntedMonsterNumber] + "/" + trigerObj.count + ") 사냥됨.");
                     }
                 }
 

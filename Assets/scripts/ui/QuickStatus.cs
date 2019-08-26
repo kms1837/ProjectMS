@@ -7,9 +7,9 @@ public class QuickStatus : MonoBehaviour {
     public GameObject target;
     private Character targetStatus;
 
-    private StatusBar hpBar;
-    private StatusBar mpBar;
-    private StatusBar expBar;
+    private ProgressBar hpBar;
+    private ProgressBar mpBar;
+    private ProgressBar expBar;
 
     private Text hpText;
     private Text mpText;
@@ -17,9 +17,9 @@ public class QuickStatus : MonoBehaviour {
     
     void Start() {
         targetStatus = target.GetComponent<Character>();
-        hpBar = this.transform.Find("HPBar").GetComponent<StatusBar>();
-        mpBar = this.transform.Find("MPBar").GetComponent<StatusBar>();
-        expBar = this.transform.Find("EXPBar").GetComponent<StatusBar>();
+        hpBar = this.transform.Find("HPBar").GetComponent<ProgressBar>();
+        mpBar = this.transform.Find("MPBar").GetComponent<ProgressBar>();
+        expBar = this.transform.Find("EXPBar").GetComponent<ProgressBar>();
         hpBar.init(targetStatus.infomation.healthPoint, new Color(1, 0, 0));
         mpBar.init(targetStatus.infomation.manaPoint, new Color(0, 0, 1));
         expBar.init(0, new Color(0, 1, 0));

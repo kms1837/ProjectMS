@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class StatusBar : MonoBehaviour
+public class ProgressBar : MonoBehaviour
 {
     private bool guiFlag = false; // onGUI flag
     public bool spriteFlag;
@@ -41,28 +41,28 @@ public class StatusBar : MonoBehaviour
      */
 
     public void setCurrent(float setValue) {
-        current = setValue;
+        this.current = setValue;
     }
 
     public void setMaximum(float setValue) {
-        maximum = setValue;
+        this.maximum = setValue;
     }
 
     public void runProgress() {
-        origin = 0;
+        this.origin = 0;
         this.stopProgress();
-        StartCoroutine("progress", maximum);
+        this.StartCoroutine("progress", maximum);
     }
 
     public void stopProgress() {
-        current = 0;
-        StopCoroutine("progress");
+        this.current = 0;
+        this.StopCoroutine("progress");
     } // 프로그레스바를 도중에 중단합니다.
 
     private IEnumerator progress(float second) {
         while (current <= second) {
-            origin += Time.deltaTime;
-            current += Time.deltaTime;
+            this.origin += Time.deltaTime;
+            this.current += Time.deltaTime;
             yield return new WaitForFixedUpdate();
         }
     }
@@ -118,6 +118,9 @@ public class StatusBar : MonoBehaviour
         if (maximum > 0 && maximum >= current) {
             moveBarEndPoint = movePoint < 0 ? (origin / maximum) : (current / maximum);
             barEndPoint = movePoint < 0 ? (current / maximum) : (origin / maximum);
+        } else {
+            barEndPoint = current >= maximum ? 1 : barEndPoint;
+            moveBarEndPoint = origin >= maximum ? 1 : moveBarEndPoint;
         }
         
 
